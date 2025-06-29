@@ -1,35 +1,23 @@
-name: Autograding Tests
 
-on:
-  push:
-  workflow_dispatch:
-  repository_dispatch:
-
-permissions:
-  checks: write
-  actions: read
-  contents: read
-
-jobs:
-  run-autograding-tests:
-    runs-on: ubuntu-latest
-    if: github.actor != 'github-classroom[bot]'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Hello World Test
-        uses: classroom-resources/autograding-io-grader@v1
-        id: hello-test
-        with:
-          test-name: Hello World Output Test
-          id: hello-test
-          command: python3 hello.py
-          expected-output: Hello, Python World!
-          comparison-method: exact
-          timeout: 10
-
-      - name: Autograding Reporter
-        uses: classroom-resources/autograding-grading-reporter@v1
-        with:
-          runners: hello-test
+     name: GitHub Classroom Workflow
+     on: [push]
+     jobs:
+       build:
+         name: Autograding
+         runs-on: ubuntu-latest
+         steps:
+           - uses: actions/checkout@v4
+             with:
+               fetch-depth: 1
+           - name: Set up Python
+             uses: actions/setup-python@v5
+             with:
+               python-version: '3.x'
+           - name: Check if hello.py exists
+             run: |
+               if [ ! -f hello.py ]; then
+                 echo "::error::hello.py not found in the repository root. Please submit a file named 'hello.py'."
+                 exit 1
+               fi
+             working-directory: ./
+           - uses: education/autograding@v1
